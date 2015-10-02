@@ -176,14 +176,18 @@
         }
 
         function zoom__drawTcImage() {
-            zoom__ctxSys.mozImageSmoothingEnabled = true;
-            zoom__ctxSys.msImageSmoothingEnabled = true;
-            zoom__ctxSys.imageSmoothingEnabled = true;
-            //zoom__ctxSys.globalCompositeOperation = "saturation";
+            zoom__ctx.mozImageSmoothingEnabled = true;
+            zoom__ctx.msImageSmoothingEnabled = true;
+            zoom__ctx.imageSmoothingEnabled = true;
 
-            zoom__ctxSys.clearRect(0, 0, zoom__thermalCanvasSys.width, zoom__thermalCanvasSys.height);
+            zoom__ctx.shadowOffsetX = 0;
+            zoom__ctx.shadowOffsetY = 0;
+            zoom__ctx.shadowBlur = 0;
+            zoom__ctx.shadowColor = "transparent";
+
+            zoom__ctx.clearRect(0, 0, zoom__thermalCanvas.width, zoom__thermalCanvas.height);
+
             var imageData = zoom__ctxSys.createImageData(64, 48);
-
             var imageDataArray = [];
             for (var row = 47; row >= 0; row--) { // inverted, cause Canvas draw top-bottom. But thermocam scan bottom-top
                 for (var col = 0; col < 64; col++) {
@@ -228,14 +232,16 @@
         }
 
         function rect__drawTcImage() {
-            zoom__ctxSys.mozImageSmoothingEnabled = true;
-            zoom__ctxSys.msImageSmoothingEnabled = true;
-            zoom__ctxSys.imageSmoothingEnabled = true;
-            zoom__ctxSys.globalCompositeOperation = "saturation";
+            rect__ctx.mozImageSmoothingEnabled = true;
+            rect__ctx.msImageSmoothingEnabled = true;
+            rect__ctx.imageSmoothingEnabled = true;
+
+            rect__ctx.shadowOffsetX = 0;
+            rect__ctx.shadowOffsetY = 0;
+            rect__ctx.shadowBlur = 0;
+            rect__ctx.shadowColor = "transparent";
 
             rect__ctx.clearRect(0, 0, rect__thermalCanvas.width, rect__thermalCanvas.height);
-            rect__ctx.fillStyle = "rgb(255,0,0)";
-            rect__ctx.fillRect(0, 0, rect__thermalCanvas.width, rect__thermalCanvas.height);
             var h = 0;
             var v = 47;
             for (var i = 0; i < common__dataTcLength; i++) {   //64*48px  = 0..3071 px
