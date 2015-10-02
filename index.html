@@ -4,19 +4,24 @@
         <meta charset="utf-8">
     </head>
     <body>
-
-        <div id="block__view">
+        <div id="block__control">
+            <input type="file" id="fileinput" />
+        </div>
+        <div style="clear: left"></div>
+        <div class="block__view">
             <canvas id="zoom__thermalCanvasSys" width="64" height="48">Обновите браузер</canvas>
             <canvas id="zoom__thermalCanvas" width="640" height="480">Обновите браузер</canvas>
-            <p id="minmax">
+            <p class="block__minmax">
                 MIN(T)=<span id="zoom__common__minTc"></span>
                 <br>
                 MAX(T)=<span id="zoom__common__maxTc"></span>
             </p>
-            <p id="cursorData">T(cursor)=<span id="zoom_TcUnderCursor"></span></p>
+            <p class="block__cursorData">
+                T(cursor)=<span id="zoom_TcUnderCursor"></span>
+            </p>
         </div>
-        <div id="block__control">
-            <input type="file" id="fileinput" />
+        <div class="block__view">
+            <canvas height='480' width='640' id='rect__thermalCanvas'>Обновите браузер</canvas>
         </div>
 
         <style type="text/css">
@@ -32,7 +37,7 @@
                 margin: 0;
                 padding: 0;
             }
-            #block__view{
+            .block__view{
                 width: 642px;
                 height: 482px;
                 display: block;
@@ -40,27 +45,26 @@
                 margin: 4px;
                 padding: 0;
             }
-            #cursorData{
+            .block__cursorData{
                 display: block;
                 float: right;                
                 margin: 4px;
                 padding: 0;
                 width: 150px;
             }
-            #minmax{
+            .block__minmax{
                 display: block;
                 float: left;                
                 margin: 4px;
                 padding: 0;
             }
             #block__control{
-                width: 400px;
-                height: 300px;
+                width: 800px;
+                height: 25px;
                 display: block;
-                float: left;
-                background-color: green;
+                float: left;                
                 margin: 4px;
-                padding: 0;
+                padding: 0;                
             }
         </style>
 
@@ -197,7 +201,7 @@
             }, false);
         }
 
-        
+
 
     </script>    
 </html>
