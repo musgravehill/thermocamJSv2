@@ -12,16 +12,24 @@
             <canvas id="zoom__thermalCanvasSys" width="64" height="48">Обновите браузер</canvas>
             <canvas id="zoom__thermalCanvas" width="640" height="480">Обновите браузер</canvas>
             <p class="block__minmax">
-                MIN(T)=<span id="zoom__common__minTc"></span>
+                MIN(T)= <span id="zoom__minTc"></span>
                 <br>
-                MAX(T)=<span id="zoom__common__maxTc"></span>
+                MAX(T)= <span id="zoom__maxTc"></span>
             </p>
             <p class="block__cursorData">
-                T(cursor)=<span id="zoom_TcUnderCursor"></span>
+                T(cursor)= <span id="zoom_TcUnderCursor"></span>
             </p>
         </div>
         <div class="block__view">
-            <canvas height='480' width='640' id='rect__thermalCanvas'>Обновите браузер</canvas>
+            <canvas  id="rect__thermalCanvas" height="480" width="640">Обновите браузер</canvas>
+            <p class="block__minmax">
+                MIN(T)= <span id="rect__minTc"></span>
+                <br>
+                MAX(T)= <span id="rect__maxTc"></span>
+            </p>
+            <p class="block__cursorData">
+                T(cursor)= <span id="rect_TcUnderCursor"></span>
+            </p>
         </div>
 
         <style type="text/css">
@@ -31,6 +39,13 @@
                 display: none;
             }
             #zoom__thermalCanvas{
+                width: 640px;
+                height: 480px;
+                border: 1px solid black;
+                margin: 0;
+                padding: 0;
+            }
+            #rect__thermalCanvas{
                 width: 640px;
                 height: 480px;
                 border: 1px solid black;
@@ -91,6 +106,9 @@
         var zoom__ctxSys = zoom__thermalCanvasSys.getContext('2d');
         var zoom__ctx = zoom__thermalCanvas.getContext('2d');
 
+        var rect__thermalCanvas = document.getElementById("rect__thermalCanvas");
+        var rect__ctx = rect__thermalCanvas.getContext('2d');
+
         document.getElementById('fileinput').addEventListener('change', readcommon__dataTcFile, false);
         function readcommon__dataTcFile(evt) {
             var f = evt.target.files[0];
@@ -101,8 +119,11 @@
                     common__minTc = Math.min.apply(Math, common__dataTc);
                     common__maxTc = Math.max.apply(Math, common__dataTc);
                     common__oneStepTc = (common__maxTc - common__minTc) / common__gradientMap.length;
+                    common__makeCanvasTcArray();
                     zoom__drawTcImage();
                     zoom__initCanvasEvents();
+                    rect__drawTcImage();
+                    rect__initCanvasEvents();
                 }
                 fr.readAsText(f);
             } else {
@@ -135,7 +156,6 @@
             T = common__canvasTc[col][row];
             return T;
         }
-
         function common__pinTemperatureByPixelClick(context, x, y, message) {
             context.shadowOffsetX = 0;
             context.shadowOffsetY = 0;
@@ -144,6 +164,15 @@
             context.font = '14pt Arial';
             context.fillStyle = 'white';
             context.fillText(message, x, y);
+        }
+        function common__makeCanvasTcArray() {
+            for (var row = 47; row >= 0; row--) { // inverted, cause Canvas draw top-bottom. But thermocam scan bottom-top
+                for (var col = 0; col < 64; col++) {
+                    var i = row + col * 48;
+                    var T = parseFloat(common__dataTc[i]);
+                    common__canvasTc[col][(47 - row)] = T; // inverted, cause Canvas draw top-bottom. But thermocam scan bottom-top
+                }
+            }
         }
 
         function zoom__drawTcImage() {
@@ -166,8 +195,6 @@
                     imageDataArray.push(colorRGB[1]);
                     imageDataArray.push(colorRGB[2]);
                     imageDataArray.push(255);
-
-                    common__canvasTc[col][(47 - row)] = T; // inverted, cause Canvas draw top-bottom. But thermocam scan bottom-top
                 }
             }
             imageData.data.set(imageDataArray);
@@ -175,10 +202,9 @@
 
             zoom__ctx.drawImage(zoom__thermalCanvasSys, 0, 0, 640, 480); //copy 64*48_canvas to 640*480_another_canvas
         }
-
         function zoom__initCanvasEvents() {
-            document.getElementById('zoom__common__maxTc').innerHTML = common__maxTc;
-            document.getElementById('zoom__common__minTc').innerHTML = common__minTc;
+            document.getElementById('zoom__maxTc').innerHTML = common__maxTc;
+            document.getElementById('zoom__minTc').innerHTML = common__minTc;
 
             zoom__thermalCanvas.removeEventListener('click');
             zoom__thermalCanvas.removeEventListener('mousemove');
@@ -201,7 +227,52 @@
             }, false);
         }
 
+        function rect__drawTcImage() {
+            rect__ctx.clearRect(0, 0, rect__thermalCanvas.width, rect__thermalCanvas.height);
+            rect__ctx.fillStyle = "rgb(255,255,255)";
+            rect__ctx.fillRect(0, 0, rect__thermalCanvas.width, rect__thermalCanvas.height);
+            var h = 0;
+            var v = 47;
+            for (var i = 0; i < common__dataTcLength; i++) {   //64*48px  = 0..3071 px
+                var T = parseFloat(common__dataTc[i]);
+                var colorRGB = common__Tc2Color(T);
 
+                rect__ctx.beginPath();
+                rect__ctx.fillStyle = "rgb(" + colorRGB[0] + "," + colorRGB[1] + "," + colorRGB[2] + ")";
+                rect__ctx.fillRect(h * common__scaleH, v * common__scaleV, common__scaleH, common__scaleV);
+                rect__ctx.closePath();
+
+                v--; // inverted, cause Canvas draw top-bottom. But thermocam scan bottom-top
+                if (v < 0) {
+                    v = 47;
+                    h++;
+                }
+            }
+        }
+        function rect__initCanvasEvents() {
+            document.getElementById('rect__maxTc').innerHTML = common__maxTc;
+            document.getElementById('rect__minTc').innerHTML = common__minTc;
+
+            rect__thermalCanvas.removeEventListener('click');
+            rect__thermalCanvas.removeEventListener('mousemove');
+            rect__thermalCanvas.addEventListener('click', function(evt) {
+                var x = evt.layerX;
+                var y = evt.layerY;
+                var messageX = x - 5;
+                var messageY = y + 10;
+                var cursorT = common__getTUnderCursor(x, y);
+                var message = '* ' + cursorT;
+                common__pinTemperatureByPixelClick(rect__ctx, messageX, messageY, message);
+            }, false);
+
+            rect__thermalCanvas.addEventListener('mousemove', function(evt) {
+                var x = evt.layerX;
+                var y = evt.layerY;
+                var cursorT = common__getTUnderCursor(x, y);
+                var message = cursorT;
+                document.getElementById('rect_TcUnderCursor').innerHTML = message;
+            }, false);
+        }
 
     </script>    
 </html>
