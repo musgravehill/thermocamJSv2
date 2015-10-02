@@ -228,8 +228,13 @@
         }
 
         function rect__drawTcImage() {
+            zoom__ctxSys.mozImageSmoothingEnabled = true;
+            zoom__ctxSys.msImageSmoothingEnabled = true;
+            zoom__ctxSys.imageSmoothingEnabled = true;
+            zoom__ctxSys.globalCompositeOperation = "saturation";
+
             rect__ctx.clearRect(0, 0, rect__thermalCanvas.width, rect__thermalCanvas.height);
-            rect__ctx.fillStyle = "rgb(255,255,255)";
+            rect__ctx.fillStyle = "rgb(255,0,0)";
             rect__ctx.fillRect(0, 0, rect__thermalCanvas.width, rect__thermalCanvas.height);
             var h = 0;
             var v = 47;
